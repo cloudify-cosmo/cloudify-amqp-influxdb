@@ -14,6 +14,16 @@
 # limitations under the License.
 ############
 
+import json
+import logging
+
+import requests
+import pika
+
+
+logging.basicConfig()
+logger = logging.getLogger('amqp_to_influx')
+
 
 class AMQPTopicConsumer(object):
 
@@ -41,17 +51,20 @@ class AMQPTopicConsumer(object):
         self.channel.queue_bind(exchange=exchange,
                        queue=routing_key,
                        routing_key=routing_key)
+        self.channel.basic_consume(self._process,
+                                   routing_key,
+                                   no_ack=True)
 
     def consume(self):
-        self.channel.basic_consume(self._process, routing_key, no_ack=True)
+        self.channel.start_consuming()
 
     def _process(self, channel, method, properties, body):
         try:
             parsed_body = json.loads(body)
             self.message_processor(parsed_body)
         except Exception as e:
-            # TODO log this or something
-            pass
+            logger.warn('Failed message processing: {0}'.format(e))
+
 
 
 class InfluxDBPublisher(object):
@@ -69,13 +82,12 @@ class InfluxDBPublisher(object):
         self.port = port
         self.user = user
         self.password = password
-        self.url = 'http://{}:{}/db/{}/series'
-                   .format(self.host,
-                           self.port,
-                           self.database)
+        self.url = 'http://{}:{}/db/{}/series'.format(self.host,
+                                                      self.port,
+                                                      self.database)
         self.params = {'u': self.user, 'p': self.password}
 
-    def process(body):
+    def process(self, body):
         data = json.dumps(self._build_body(body))
         response = requests.post(
             self.url,
@@ -84,18 +96,18 @@ class InfluxDBPublisher(object):
             headers={
                 'Content-Type': 'application/json'
             })
-        if response.status_code = 201:
-            # TODO log this or something
-            pass
+        if response.status_code != 200:
+            raise RuntimeError('influxdb response code: {0}'
+                               .format(response.status_code))
 
-    def _build_body(body):
+    def _build_body(self, body):
         return [{
             'name': self._name(body),
-            'points': self._points(body)
+            'points': self._points(body),
             'columns': self.columns,
         }]
 
-    def _name(body):
+    def _name(self, body):
         return '{}.{}.{}.{}_{}'.format(
             body['deployment_id'],
             body['node_name'],
@@ -103,16 +115,5 @@ class InfluxDBPublisher(object):
             body['name'],
             body['path'])
 
-    def _points(body):
+    def _points(self, body):
         return [[body['metric'], body['unit'], body['type']]]
-
-
-amqp_exchange = ''
-amqp_routing_key = ''
-influx_database = ''
-
-publisher = InfluxDBPublisher(database=influx_database)
-consumer = AMQPTopicConsumer(exchange=amqp_exchange,
-                             routing_key=amqp_routing_key,
-                             message_processor=publisher.process)
-consumer.consume()
