@@ -18,11 +18,11 @@
 from setuptools import setup
 
 setup(
-    name='cloudify-amqp-to-influx',
+    name='cloudify-amqp-influxdb',
     version='1.1a4',
     author='Cloudify',
     author_email='cosmo-admin@gigaspaces.com',
-    packages=['amqp_to_influx'],
+    packages=['amqp_influxdb'],
     install_requires=[
         'pika==0.9.13',
         'requests==2.4.1'

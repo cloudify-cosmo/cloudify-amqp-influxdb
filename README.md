@@ -1,4 +1,4 @@
-cloudify-amqp-to-influx
+cloudify-amqp-influxdb
 =======================
 
-Reads from an ampq (exchange, routing_queue) and write to influx db
+A Cloudify specific transport to consume events from RMQ and push them to InfluxDB

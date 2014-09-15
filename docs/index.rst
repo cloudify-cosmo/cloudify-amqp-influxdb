@@ -11,12 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-.. automodule:: diamond_agent.tasks
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. automodule:: cloudify_handler.cloudify
+.. automodule:: amqp_influxdb
    :members:
    :undoc-members:
    :show-inheritance:
