@@ -32,7 +32,6 @@ def main():
     args = parse_args()
 
     publisher = InfluxDBPublisher(
-        host='11.0.0.7',
         database=args.influx_database)
     consumer = AMQPTopicConsumer(
         exchange=args.amqp_exchange,

@@ -39,18 +39,18 @@ class AMQPTopicConsumer(object):
             pika.ConnectionParameters(**connection_parameters))
         self.channel = self.connection.channel()
         self.channel.exchange_declare(exchange=exchange,
-                                 type='topic',
-                                 durable=False,
-                                 auto_delete=True,
-                                 internal=False)
+                                      type='topic',
+                                      durable=False,
+                                      auto_delete=True,
+                                      internal=False)
         self.channel.queue_declare(
             queue=routing_key,
             auto_delete=True,
             durable=False,
             exclusive=False)
         self.channel.queue_bind(exchange=exchange,
-                       queue=routing_key,
-                       routing_key=routing_key)
+                                queue=routing_key,
+                                routing_key=routing_key)
         self.channel.basic_consume(self._process,
                                    routing_key,
                                    no_ack=True)
@@ -64,7 +64,6 @@ class AMQPTopicConsumer(object):
             self.message_processor(parsed_body)
         except Exception as e:
             logger.warn('Failed message processing: {0}'.format(e))
-
 
 
 class InfluxDBPublisher(object):
@@ -82,9 +81,9 @@ class InfluxDBPublisher(object):
         self.port = port
         self.user = user
         self.password = password
-        self.url = 'http://{}:{}/db/{}/series'.format(self.host,
-                                                      self.port,
-                                                      self.database)
+        self.url = 'http://{0}:{1}/db/{2}/series'.format(self.host,
+                                                         self.port,
+                                                         self.database)
         self.params = {'u': self.user, 'p': self.password}
 
     def process(self, body):
@@ -108,7 +107,7 @@ class InfluxDBPublisher(object):
         }]
 
     def _name(self, body):
-        return '{}.{}.{}.{}_{}'.format(
+        return '{0}.{1}.{2}.{3}_{4}'.format(
             body['deployment_id'],
             body['node_name'],
             body['node_id'],
