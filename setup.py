@@ -23,6 +23,11 @@ setup(
     author='Cloudify',
     author_email='cosmo-admin@gigaspaces.com',
     packages=['amqp_influxdb'],
+    entry_points={
+        'console_scripts': [
+            'amqp-influx = amqp_influxdb.__main__:main',
+        ]
+    },
     install_requires=[
         'pika==0.9.13',
         'requests==2.4.1'
