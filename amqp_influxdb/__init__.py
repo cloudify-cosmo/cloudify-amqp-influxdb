@@ -22,7 +22,7 @@ import pika
 
 
 logging.basicConfig()
-logger = logging.getLogger('amqp_to_influx')
+logger = logging.getLogger('amqp_influx')
 
 
 class AMQPTopicConsumer(object):
