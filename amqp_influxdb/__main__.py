@@ -16,8 +16,7 @@
 
 import argparse
 
-from amqp_to_influx import (InfluxDBPublisher,
-                            AMQPTopicConsumer)
+from amqp_influxdb import (InfluxDBPublisher, AMQPTopicConsumer)
 
 
 def parse_args():
