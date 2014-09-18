@@ -25,7 +25,7 @@ setup(
     packages=['amqp_influxdb'],
     entry_points={
         'console_scripts': [
-            'amqp-influx = amqp_influxdb.__main__:main',
+            'cloudify-amqp-influxdb = amqp_influxdb.__main__:main',
         ]
     },
     install_requires=[
