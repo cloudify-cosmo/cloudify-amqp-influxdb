@@ -43,16 +43,16 @@ class AMQPTopicConsumer(object):
                                       durable=False,
                                       auto_delete=True,
                                       internal=False)
-        self.channel.queue_declare(
-            queue=routing_key,
+        result = self.channel.queue_declare(
             auto_delete=True,
             durable=False,
             exclusive=False)
+        queue = result.method.queue
         self.channel.queue_bind(exchange=exchange,
-                                queue=routing_key,
+                                queue=queue,
                                 routing_key=routing_key)
         self.channel.basic_consume(self._process,
-                                   routing_key,
+                                   queue,
                                    no_ack=True)
 
     def consume(self):
