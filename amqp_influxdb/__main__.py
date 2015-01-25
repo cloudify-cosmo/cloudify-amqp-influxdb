@@ -21,8 +21,12 @@ from amqp_influxdb import (InfluxDBPublisher, AMQPTopicConsumer)
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--amqp-hostname', required=False,
+                        default='localhost')
     parser.add_argument('--amqp-exchange', required=True)
     parser.add_argument('--amqp-routing-key', required=True)
+    parser.add_argument('--influx-hostname', required=False,
+                        default='localhost')
     parser.add_argument('--influx-database', required=True)
     return parser.parse_args()
 
@@ -31,11 +35,13 @@ def main():
     args = parse_args()
 
     publisher = InfluxDBPublisher(
-        database=args.influx_database)
+        database=args.influx_database,
+        host=args.influx_hostname)
     consumer = AMQPTopicConsumer(
         exchange=args.amqp_exchange,
         routing_key=args.amqp_routing_key,
-        message_processor=publisher.process)
+        message_processor=publisher.process,
+        connection_parameters={'host': args.amqp_hostname})
     consumer.consume()
 
 
