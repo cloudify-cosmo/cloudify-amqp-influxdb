@@ -37,11 +37,17 @@ def main():
     publisher = InfluxDBPublisher(
         database=args.influx_database,
         host=args.influx_hostname)
+
+    conn_params = {
+        'host': args.amqp_hostname,
+        'connection_attempts': 12,
+        'retry_delay': 5
+    }
     consumer = AMQPTopicConsumer(
         exchange=args.amqp_exchange,
         routing_key=args.amqp_routing_key,
         message_processor=publisher.process,
-        connection_parameters={'host': args.amqp_hostname})
+        connection_parameters=conn_params)
     consumer.consume()
 
 

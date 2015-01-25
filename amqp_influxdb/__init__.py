@@ -19,7 +19,11 @@ import logging
 
 import requests
 import pika
+from time import sleep
+from pika.exceptions import AMQPConnectionError
 
+D_CONN_ATTEMPTS = 12
+D_RETRY_DELAY = 5
 
 logging.basicConfig()
 logger = logging.getLogger('amqp_influx')
@@ -35,8 +39,24 @@ class AMQPTopicConsumer(object):
         self.message_processor = message_processor
 
         connection_parameters = connection_parameters or {}
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(**connection_parameters))
+
+        # add retry with try/catch because Pika currently ignoring these
+        # connection parameters when using BlockingConnection:
+        # https://github.com/pika/pika/issues/354
+        attempts = connection_parameters.get('connection_attempts',
+                                             D_CONN_ATTEMPTS)
+        timeout = connection_parameters.get('retry_delay', D_RETRY_DELAY)
+        for _ in range(attempts):
+            try:
+                self.connection = pika.BlockingConnection(
+                    pika.ConnectionParameters(**connection_parameters))
+            except AMQPConnectionError:
+                sleep(timeout)
+            else:
+                break
+        else:
+            raise AMQPConnectionError
+
         self.channel = self.connection.channel()
         self.channel.exchange_declare(exchange=exchange,
                                       type='topic',
