@@ -121,11 +121,10 @@ class InfluxDBPublisher(object):
 
         if self.current_batch_size < self.batch_size:
             return
-        else:
-            data = json.dumps(self._build_body())
-            self.current_batch_size = 0
-            self.current_batch = {}
 
+        data = json.dumps(self._build_body())
+        self.current_batch_size = 0
+        self.current_batch = {}
         response = requests.post(
             self.url,
             data=data,
