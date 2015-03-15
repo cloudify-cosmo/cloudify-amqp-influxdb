@@ -24,6 +24,7 @@ from pika.exceptions import AMQPConnectionError
 
 D_CONN_ATTEMPTS = 12
 D_RETRY_DELAY = 5
+BATCH_SIZE = 100
 
 logging.basicConfig()
 logger = logging.getLogger('amqp_influx')
@@ -96,7 +97,7 @@ class InfluxDBPublisher(object):
                  port=8086,
                  user='root',
                  password='root',
-                 batch_size=100):
+                 batch_size=BATCH_SIZE):
         self.database = database
         self.batch_size = batch_size
         self.host = host

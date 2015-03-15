@@ -16,7 +16,10 @@
 
 import argparse
 
-from amqp_influxdb import (InfluxDBPublisher, AMQPTopicConsumer)
+from amqp_influxdb import (
+    InfluxDBPublisher,
+    AMQPTopicConsumer,
+    BATCH_SIZE)
 
 
 def parse_args():
@@ -28,7 +31,7 @@ def parse_args():
     parser.add_argument('--influx-hostname', required=False,
                         default='localhost')
     parser.add_argument('--influx-database', required=True)
-    parser.add_argument('--influx-batch-size', type=int, default=100)
+    parser.add_argument('--influx-batch-size', type=int, default=BATCH_SIZE)
     return parser.parse_args()
 
 
