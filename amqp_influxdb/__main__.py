@@ -28,6 +28,7 @@ def parse_args():
     parser.add_argument('--influx-hostname', required=False,
                         default='localhost')
     parser.add_argument('--influx-database', required=True)
+    parser.add_argument('--influx-batch-size', type=int, default=100)
     return parser.parse_args()
 
 
@@ -36,7 +37,8 @@ def main():
 
     publisher = InfluxDBPublisher(
         database=args.influx_database,
-        host=args.influx_hostname)
+        host=args.influx_hostname,
+        batch_size=args.influx_batch_size)
 
     conn_params = {
         'host': args.amqp_hostname,
