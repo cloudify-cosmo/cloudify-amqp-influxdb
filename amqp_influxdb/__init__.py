@@ -16,15 +16,18 @@
 
 import json
 import logging
+import time
 
 import requests
 import pika
-from time import sleep
 from pika.exceptions import AMQPConnectionError
+
 
 D_CONN_ATTEMPTS = 12
 D_RETRY_DELAY = 5
 BATCH_SIZE = 100
+MAX_BATCH_DELAY = 5
+
 
 logging.basicConfig()
 logger = logging.getLogger('amqp_influx')
@@ -52,7 +55,7 @@ class AMQPTopicConsumer(object):
                 self.connection = pika.BlockingConnection(
                     pika.ConnectionParameters(**connection_parameters))
             except AMQPConnectionError:
-                sleep(timeout)
+                time.sleep(timeout)
             else:
                 break
         else:
@@ -97,9 +100,11 @@ class InfluxDBPublisher(object):
                  port=8086,
                  user='root',
                  password='root',
-                 batch_size=BATCH_SIZE):
+                 batch_size=BATCH_SIZE,
+                 max_batch_delay=MAX_BATCH_DELAY):
         self.database = database
         self.batch_size = batch_size
+        self.max_batch_delay = max_batch_delay
         self.host = host
         self.port = port
         self.user = user
@@ -110,6 +115,7 @@ class InfluxDBPublisher(object):
         self.params = {'u': self.user, 'p': self.password}
         self.current_batch_size = 0
         self.current_batch = {}
+        self.last_batch_time = time.time()
 
     def process(self, event):
         name = self._event_name(event)
@@ -119,7 +125,8 @@ class InfluxDBPublisher(object):
         points.append(self._event_point(event))
         self.current_batch_size += 1
 
-        if self.current_batch_size < self.batch_size:
+        if (self.current_batch_size < self.batch_size and
+                time.time() < self.last_batch_time + self.max_batch_delay):
             return
 
         data = json.dumps(self._build_body())
@@ -132,6 +139,7 @@ class InfluxDBPublisher(object):
             headers={
                 'Content-Type': 'application/json'
             })
+        self.last_batch_time = time.time()
         if response.status_code != 200:
             raise RuntimeError('influxdb response code: {0}'
                                .format(response.status_code))
