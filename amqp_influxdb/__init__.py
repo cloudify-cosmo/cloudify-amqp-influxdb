@@ -16,14 +16,18 @@
 
 import json
 import logging
+import time
 
 import requests
 import pika
-from time import sleep
 from pika.exceptions import AMQPConnectionError
+
 
 D_CONN_ATTEMPTS = 12
 D_RETRY_DELAY = 5
+BATCH_SIZE = 100
+MAX_BATCH_DELAY = 5
+
 
 logging.basicConfig()
 logger = logging.getLogger('amqp_influx')
@@ -51,7 +55,7 @@ class AMQPTopicConsumer(object):
                 self.connection = pika.BlockingConnection(
                     pika.ConnectionParameters(**connection_parameters))
             except AMQPConnectionError:
-                sleep(timeout)
+                time.sleep(timeout)
             else:
                 break
         else:
@@ -95,8 +99,12 @@ class InfluxDBPublisher(object):
                  host='localhost',
                  port=8086,
                  user='root',
-                 password='root'):
+                 password='root',
+                 batch_size=BATCH_SIZE,
+                 max_batch_delay=MAX_BATCH_DELAY):
         self.database = database
+        self.batch_size = batch_size
+        self.max_batch_delay = max_batch_delay
         self.host = host
         self.port = port
         self.user = user
@@ -105,9 +113,25 @@ class InfluxDBPublisher(object):
                                                          self.port,
                                                          self.database)
         self.params = {'u': self.user, 'p': self.password}
+        self.current_batch_size = 0
+        self.current_batch = {}
+        self.last_batch_time = time.time()
 
-    def process(self, body):
-        data = json.dumps(self._build_body(body))
+    def process(self, event):
+        name = self._event_name(event)
+        if name not in self.current_batch:
+            self.current_batch[name] = []
+        points = self.current_batch[name]
+        points.append(self._event_point(event))
+        self.current_batch_size += 1
+
+        if (self.current_batch_size < self.batch_size and
+                time.time() < self.last_batch_time + self.max_batch_delay):
+            return
+
+        data = json.dumps(self._build_body())
+        self.current_batch_size = 0
+        self.current_batch = {}
         response = requests.post(
             self.url,
             data=data,
@@ -115,24 +139,30 @@ class InfluxDBPublisher(object):
             headers={
                 'Content-Type': 'application/json'
             })
+        self.last_batch_time = time.time()
         if response.status_code != 200:
             raise RuntimeError('influxdb response code: {0}'
                                .format(response.status_code))
 
-    def _build_body(self, body):
-        return [{
-            'name': self._name(body),
-            'points': self._points(body),
-            'columns': self.columns,
-        }]
+    def _build_body(self):
+        body = []
+        for name, points in self.current_batch.iteritems():
+            body.append({
+                'name': name,
+                'points': points,
+                'columns': self.columns
+            })
+        return body
 
-    def _name(self, body):
+    @staticmethod
+    def _event_name(event):
         return '{0}.{1}.{2}.{3}_{4}'.format(
-            body['deployment_id'],
-            body['node_name'],
-            body['node_id'],
-            body['name'],
-            body['path'])
+            event['deployment_id'],
+            event['node_name'],
+            event['node_id'],
+            event['name'],
+            event['path'])
 
-    def _points(self, body):
-        return [[body['metric'], body['unit'], body['type']]]
+    @staticmethod
+    def _event_point(event):
+        return event['metric'], event['unit'], event['type']
