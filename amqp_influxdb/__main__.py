@@ -48,7 +48,7 @@ def main():
         batch_size=args.influx_batch_size,
         max_batch_delay=args.influx_max_batch_delay)
 
-    credentials = PlainCredentials('guest', 'guest')
+    credentials = PlainCredentials('cloudify', 'cl10dify')
 
     conn_params = {
         'host': args.amqp_hostname,

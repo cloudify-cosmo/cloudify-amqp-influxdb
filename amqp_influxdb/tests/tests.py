@@ -70,8 +70,9 @@ def publish_event(unique_id):
         'type': 'type',
     }
 
+    credentials = pika.PlainCredentials('cloudify', 'cl10dify')
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host='localhost'))
+        pika.ConnectionParameters(host='localhost', credentials=credentials))
     channel = connection.channel()
     channel.exchange_declare(exchange=amqp_exchange,
                              type='topic',
