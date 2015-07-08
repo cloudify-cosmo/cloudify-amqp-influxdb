@@ -1,5 +1,4 @@
-#/bin/bash
-set -e
+#!/bin/bash -e
 
 # Usage
 if [ -z "$1" ]; then
@@ -12,7 +11,7 @@ fi
 FILEURL="http://s3.amazonaws.com/influxdb/influxdb_$1_amd64.deb"
 TEMPFILE=$(mktemp --suffix=.deb)
 printf "Trying to download $FILEURL, saving as $TEMPFILE\n"
-curl --fail --progress-bar -L "http://s3.amazonaws.com/influxdb/influxdb_$1_amd64.deb" -o "$TEMPFILE"
+curl --fail --progress-bar -L "$FILEURL" -o "$TEMPFILE"
 
 # Install & start
 printf "Installing InfluxDB\n"

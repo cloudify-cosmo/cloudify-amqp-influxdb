@@ -15,7 +15,6 @@
 ############
 
 import argparse
-from pika import PlainCredentials
 
 from amqp_influxdb import (
     InfluxDBPublisher,
@@ -48,13 +47,10 @@ def main():
         batch_size=args.influx_batch_size,
         max_batch_delay=args.influx_max_batch_delay)
 
-    credentials = PlainCredentials('cloudify', 'cl10dify')
-
     conn_params = {
         'host': args.amqp_hostname,
         'connection_attempts': 12,
         'retry_delay': 5,
-        'credentials': credentials
     }
     consumer = AMQPTopicConsumer(
         exchange=args.amqp_exchange,
