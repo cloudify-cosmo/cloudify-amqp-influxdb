@@ -46,7 +46,7 @@ class AMQPTopicConsumer(object):
 
         if 'credentials' not in connection_parameters:
             connection_parameters['credentials'] = \
-                pika.PlainCredentials('cloudify', 'cl10dify')
+                pika.PlainCredentials('cloudify', 'c10udify')
 
         # add retry with try/catch because Pika currently ignoring these
         # connection parameters when using BlockingConnection:
