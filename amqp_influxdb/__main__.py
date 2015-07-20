@@ -50,7 +50,7 @@ def main():
     conn_params = {
         'host': args.amqp_hostname,
         'connection_attempts': 12,
-        'retry_delay': 5
+        'retry_delay': 5,
     }
     consumer = AMQPTopicConsumer(
         exchange=args.amqp_exchange,

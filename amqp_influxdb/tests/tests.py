@@ -17,11 +17,14 @@
 import unittest
 import threading
 import json
+import uuid
+import time
 
 import pika
+from influxdb.influxdb08 import InfluxDBClient
 
-from amqp_to_influx import (InfluxDBPublisher,
-                            AMQPTopicConsumer)
+from amqp_influxdb import (InfluxDBPublisher,
+                           AMQPTopicConsumer)
 
 
 influx_database = 'influx'
@@ -36,7 +39,7 @@ class Test(unittest.TestCase):
         def start():
             publisher = InfluxDBPublisher(
                 database=influx_database,
-                host='11.0.0.7')
+                host='localhost')
             consumer = AMQPTopicConsumer(
                 exchange=amqp_exchange,
                 routing_key=routing_key,
@@ -47,16 +50,19 @@ class Test(unittest.TestCase):
         thread.daemon = True
 
         thread.start()
-        publish_event()
-        thread.join()
+        time.sleep(5)
+        event_id = str(uuid.uuid4())
+        publish_event(event_id)
+        thread.join(3)
+        self.assertTrue(find_event(event_id), 'event not found in influxdb')
 
 
-def publish_event():
+def publish_event(unique_id):
 
     event = {
         'node_id': 'node_id',
         'node_name': 'node_name',
-        'deployment_id': 'deployment_id',
+        'deployment_id': unique_id,
         'name': 'name',
         'path': 'path',
         'metric': 100,
@@ -64,24 +70,23 @@ def publish_event():
         'type': 'type',
     }
 
+    credentials = pika.PlainCredentials('cloudify', 'cl10dify')
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host='localhost'))
+        pika.ConnectionParameters(host='localhost', credentials=credentials))
     channel = connection.channel()
     channel.exchange_declare(exchange=amqp_exchange,
                              type='topic',
                              durable=False,
                              auto_delete=True,
                              internal=False)
-    channel.queue_declare(
-        queue=routing_key,
-        auto_delete=True,
-        durable=False,
-        exclusive=False)
-    channel.queue_bind(exchange=amqp_exchange,
-                       queue=routing_key,
-                       routing_key=routing_key)
     channel.basic_publish(exchange=amqp_exchange,
                           routing_key=routing_key,
                           body=json.dumps(event))
     channel.close()
     connection.close()
+
+
+def find_event(unique_id):
+    client = InfluxDBClient('localhost', 8086, 'root', 'root', influx_database)
+    results = client.query('select * from /{0}/ limit 1'.format(unique_id))
+    return bool(len(results))
