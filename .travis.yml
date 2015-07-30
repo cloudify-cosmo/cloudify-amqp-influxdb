@@ -10,7 +10,7 @@ env:
     - TOX_ENV=py27 INFLUXDB_VERSION=0.8.8
 before_script:
     - sh -c "if [ -n \"$INFLUXDB_VERSION\" ] ; then sudo ./install_influxdb.sh \"$INFLUXDB_VERSION\"; fi"
-    - sudo rabbitmqctl add_user cloudify cl10dify
+    - sudo rabbitmqctl add_user cloudify c10udify
     - sudo rabbitmqctl set_permissions cloudify '.*' '.*' '.*'
     - sudo rabbitmqctl delete_user guest
 install:

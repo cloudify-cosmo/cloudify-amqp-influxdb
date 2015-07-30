@@ -70,7 +70,7 @@ def publish_event(unique_id):
         'type': 'type',
     }
 
-    credentials = pika.PlainCredentials('cloudify', 'cl10dify')
+    credentials = pika.PlainCredentials('cloudify', 'c10udify')
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host='localhost', credentials=credentials))
     channel = connection.channel()
