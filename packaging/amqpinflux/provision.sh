@@ -37,7 +37,7 @@ function upload_to_s3() {
 # VERSION/PRERELEASE/BUILD are exported to follow with our standard of exposing them as env vars. They are not used.
 export VERSION="3.3.0"
 export PRERELEASE="m5"
-export BUILD="274"
+export BUILD="275"
 CORE_TAG_NAME="3.3m5"
 
 AWS_ACCESS_KEY_ID=$1
