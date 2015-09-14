@@ -16,6 +16,7 @@
 
 import json
 import logging
+import ssl
 import time
 
 import requests
@@ -27,6 +28,8 @@ D_CONN_ATTEMPTS = 12
 D_RETRY_DELAY = 5
 BATCH_SIZE = 100
 MAX_BATCH_DELAY = 5
+BROKER_PORT_SSL = 5671
+BROKER_PORT_NO_SSL = 5672
 
 
 logging.basicConfig()
@@ -40,9 +43,35 @@ class AMQPTopicConsumer(object):
                  routing_key,
                  message_processor,
                  connection_parameters=None):
+        """
+            AMQPTopicConsumer initialisation expects a connection_parameters
+            dict as provided by the __main__ of amqp_influx.
+        """
+        if connection_parameters is None:
+            connection_parameters = {}
+
         self.message_processor = message_processor
 
-        connection_parameters = connection_parameters or {}
+        credentials = connection_parameters.get('credentials', {})
+        credentials_object = pika.credentials.PlainCredentials(
+            # These may be passed as None, so handle the default outside of
+            # the get
+            username=credentials.get('username') or 'guest',
+            password=credentials.get('password') or 'guest',
+        )
+        connection_parameters['credentials'] = credentials_object
+
+        if connection_parameters.get('ssl', False):
+            connection_parameters['ssl_options'] = {
+                'cert_reqs': ssl.CERT_REQUIRED,
+                # Currently, not having a ca path with SSL enabled is
+                # effectively an error, so we will let it fail
+                'ca_certs': connection_parameters['ca_path'],
+            }
+
+        if 'ca_path' in connection_parameters.keys():
+            # We don't need this any more
+            connection_parameters.pop('ca_path')
 
         # add retry with try/catch because Pika currently ignoring these
         # connection parameters when using BlockingConnection:
