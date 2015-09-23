@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument('--influx-database', required=True)
     parser.add_argument('--influx-db-user', required=False,
                         default='root')
-    parser.add_argument('--influx-db-pass', required=False,
+    parser.add_argument('--influx-db-password', required=False,
                         default='root')
     parser.add_argument('--influx-batch-size', type=int, default=BATCH_SIZE)
     parser.add_argument('--influx-max-batch-delay', type=int,
