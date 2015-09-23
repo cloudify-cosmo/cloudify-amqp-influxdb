@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument('--influx-hostname', required=False,
                         default='localhost')
     parser.add_argument('--influx-database', required=True)
-    parser.add_argument('--influx-db-username', required=False,
+    parser.add_argument('--influx-db-user', required=False,
                         default='root')
     parser.add_argument('--influx-db-pass', required=False,
                         default='root')
