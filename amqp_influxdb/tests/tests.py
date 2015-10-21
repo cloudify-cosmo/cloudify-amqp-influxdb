@@ -40,10 +40,27 @@ class Test(unittest.TestCase):
             publisher = InfluxDBPublisher(
                 database=influx_database,
                 host='localhost')
+
+            # Default conn parameters from __main__, with username and
+            # password specified
+            conn_parameters = {
+                'host': 'localhost',
+                'port': 5672,
+                'connection_attempts': 12,
+                'retry_delay': 5,
+                'credentials': {
+                    'username': 'guest',
+                    'password': 'guest',
+                },
+                'ssl': False,
+                'ca_path': '',
+            }
+
             consumer = AMQPTopicConsumer(
                 exchange=amqp_exchange,
                 routing_key=routing_key,
-                message_processor=publisher.process)
+                message_processor=publisher.process,
+                connection_parameters=conn_parameters)
             consumer.consume()
 
         thread = threading.Thread(target=start)

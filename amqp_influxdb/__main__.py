@@ -20,13 +20,23 @@ from amqp_influxdb import (
     InfluxDBPublisher,
     AMQPTopicConsumer,
     BATCH_SIZE,
-    MAX_BATCH_DELAY)
+    MAX_BATCH_DELAY,
+    BROKER_PORT_SSL,
+    BROKER_PORT_NO_SSL,
+)
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--amqp-hostname', required=False,
                         default='localhost')
+    parser.add_argument('--amqp-username', required=False,
+                        default='guest')
+    parser.add_argument('--amqp-password', required=False,
+                        default='guest')
+    parser.add_argument('--amqp-ssl-enabled', required=False)
+    parser.add_argument('--amqp-ca-cert-path', required=False,
+                        default='')
     parser.add_argument('--amqp-exchange', required=True)
     parser.add_argument('--amqp-routing-key', required=True)
     parser.add_argument('--influx-hostname', required=False,
@@ -47,10 +57,25 @@ def main():
         batch_size=args.influx_batch_size,
         max_batch_delay=args.influx_max_batch_delay)
 
+    # This arg is a string for ease of use with the manager blueprint
+    if args.amqp_ssl_enabled.lower() == 'true':
+        ssl_enabled = True
+        amqp_port = BROKER_PORT_SSL
+    else:
+        ssl_enabled = False
+        amqp_port = BROKER_PORT_NO_SSL
+
     conn_params = {
         'host': args.amqp_hostname,
+        'port': amqp_port,
         'connection_attempts': 12,
-        'retry_delay': 5
+        'retry_delay': 5,
+        'credentials': {
+            'username': args.amqp_username,
+            'password': args.amqp_password,
+        },
+        'ca_path': args.amqp_ca_cert_path,
+        'ssl': ssl_enabled,
     }
     consumer = AMQPTopicConsumer(
         exchange=args.amqp_exchange,
