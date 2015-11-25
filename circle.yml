@@ -1,0 +1,17 @@
+machine:
+  environment:
+    INFLUXDB_VERSION: 0.8.8
+dependencies:
+  post:
+    - pyenv local 2.7.9 
+  override:
+    - pip install tox
+
+test:
+  pre: 
+    - "if [ -n \"$INFLUXDB_VERSION\" ] ; then sudo ./install_influxdb.sh \"$INFLUXDB_VERSION\"; fi"
+  override:
+    - tox -e docs
+    - tox -e flake8
+    - tox -e py27 INFLUXDB_VERSION=0.8.8
+
