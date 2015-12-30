@@ -42,7 +42,7 @@ CORE_TAG_NAME="3.4m1"
 
 AWS_ACCESS_KEY_ID=$1
 AWS_ACCESS_KEY=$2
-AWS_S3_BUCKET_PATH="gigaspaces-repository-eu/org/cloudify3/${VERSION}/${PRERELEASE}-RELEASE"
+AWS_S3_BUCKET_PATH="gigaspaces-repository-eu/org/cloudify3/${VERSION}/${PRERELEASE}"
 
 echo "VERSION: ${VERSION}"
 echo "PRERELEASE: ${PRERELEASE}"
