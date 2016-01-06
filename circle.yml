@@ -1,6 +1,16 @@
 machine:
   environment:
     INFLUXDB_VERSION: 0.8.8
+
+checkout:
+  post:
+    - >
+      if [ -n "$CI_PULL_REQUEST" ]; then
+        PR_ID=${CI_PULL_REQUEST##*/}
+        git fetch origin +refs/pull/$PR_ID/merge:
+        git checkout -qf FETCH_HEAD
+      fi
+
 dependencies:
   post:
     - pyenv local 2.7.9 
@@ -14,4 +24,3 @@ test:
     - tox -e docs
     - tox -e flake8
     - tox -e py27 INFLUXDB_VERSION=0.8.8
-
