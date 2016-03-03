@@ -52,7 +52,7 @@ virtualenv /opt/amqpinflux/env && \
 %preun
 %postun
 
-rm -rf /opt/amqpinflux
+rm -rf /opt/amqpinflux/env
 rm -rf /var/wheels/${name}
 
 
