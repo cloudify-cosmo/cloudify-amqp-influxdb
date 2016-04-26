@@ -46,13 +46,12 @@ sudo /tmp/env/bin/pip wheel --wheel-dir=%{buildroot}/var/wheels/%{name} --find-l
 
 pip install --use-wheel --no-index --find-links=/var/wheels/%{name} virtualenv && \
 virtualenv /opt/amqpinflux/env && \
-/opt/amqpinflux/env/bin/pip install --use-wheel --no-index --find-links=/var/wheels/%{name} cloudify-amqp-influxdb --pre
+/opt/amqpinflux/env/bin/pip install --upgrade --use-wheel --no-index --find-links=/var/wheels/%{name} cloudify-amqp-influxdb --pre
 
 
 %preun
 %postun
 
-rm -rf /opt/amqpinflux/env
 rm -rf /var/wheels/${name}
 
 
