@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "You're about to uninstall cloudify-amqp-influxdb!"
+
