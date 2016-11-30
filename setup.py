@@ -19,7 +19,7 @@ from setuptools import setup
 
 setup(
     name='cloudify-amqp-influxdb',
-    version='4.0a8',
+    version='4.0a9',
     author='Cloudify',
     author_email='cosmo-admin@gigaspaces.com',
     packages=['amqp_influxdb'],
