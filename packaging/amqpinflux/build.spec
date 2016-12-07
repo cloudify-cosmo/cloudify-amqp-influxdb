@@ -3,7 +3,7 @@
 
 Name:           cloudify-amqp-influx
 Version:        %{VERSION}
-Release:        %{PRERELEASE}_b%{BUILD}
+Release:        %{PRERELEASE}
 Summary:        Cloudify's AMQP InfluxDB Broker
 Group:          Applications/Multimedia
 License:        Apache 2.0
