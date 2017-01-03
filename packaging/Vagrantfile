@@ -22,6 +22,9 @@ AWS_ACCESS_KEY_ID_UPLOAD_TEMP = ENV['AWS_ACCESS_KEY_ID_UPLOAD_TEMP']
 AWS_ACCESS_KEY_UPLOAD_TEMP = ENV['AWS_ACCESS_KEY_UPLOAD_TEMP']
 PACKAGER_BRANCH = ENV['PACKAGER_BRANCH']
 AMQP_INFLUX_BRANCH = ENV['tag']
+REPO = ENV['REPO']
+GITHUB_USERNAME = ENV['GITHUB_USERNAME']
+GITHUB_PASSWORD = ENV['GITHUB_PASSWORD']
 
 CENTOS7_OFFICIAL_BOX_URL = 'http://cloud.centos.org/centos/7/vagrant/x86_64/images/CentOS-7.box'
 
@@ -45,7 +48,7 @@ Vagrant.configure('2') do |config|
     end
     amqpinflux.vm.provision "shell" do |s|
       s.path = "amqpinflux/provision.sh"
-      s.args = "#{AWS_ACCESS_KEY_ID_UPLOAD_TEMP} #{AWS_ACCESS_KEY_UPLOAD_TEMP}"
+      s.args = "#{AWS_ACCESS_KEY_ID_UPLOAD_TEMP} #{AWS_ACCESS_KEY_UPLOAD_TEMP} #{REPO} #{GITHUB_USERNAME} #{GITHUB_PASSWORD}"
       s.privileged = false
     end
   end
