@@ -11,6 +11,7 @@ function build_rpm() {
         --define "PRERELEASE $PRERELEASE" \
         --define "BUILD $BUILD" \
         --define "CORE_TAG_NAME $CORE_TAG_NAME" \
+        --define "CORE_BRANCH $CORE_BRANCH" \
     # This is the UGLIEST HACK EVER!
     # Since rpmbuild spec files cannot receive a '-' in their version,
     # we do this... thing and replace an underscore with a dash.
@@ -22,22 +23,16 @@ function build_rpm() {
 # VERSION/PRERELEASE/BUILD are exported to follow with our standard of exposing them as env vars. They are not used.
 
 export CORE_TAG_NAME="4.1"
+export CORE_BRANCH="master"
 AWS_ACCESS_KEY_ID=$1
 AWS_ACCESS_KEY=$2
 export REPO=$3
 export GITHUB_USERNAME=$4
 export GITHUB_PASSWORD=$5
 
-if [ $REPO == "cloudify-versions" ];then
-    REPO_TAG="master"
-else
-    REPO_TAG=$CORE_TAG_NAME
-fi
-echo "REPO=${REPO} ; REPO_TAG=${REPO_TAG}"
-
-curl -u $GITHUB_USERNAME:$GITHUB_PASSWORD https://raw.githubusercontent.com/cloudify-cosmo/${REPO}/${REPO_TAG}/packages-urls/common_build_env.sh -o ./common_build_env.sh &&
+curl -u $GITHUB_USERNAME:$GITHUB_PASSWORD https://raw.githubusercontent.com/cloudify-cosmo/${REPO}/${CORE_BRANCH}/packages-urls/common_build_env.sh -o ./common_build_env.sh &&
 source common_build_env.sh &&
-curl https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/${REPO_TAG}/common/provision.sh -o ./common-provision.sh &&
+curl https://raw.githubusercontent.com/cloudify-cosmo/cloudify-packager/${CORE_BRANCH}/common/provision.sh -o ./common-provision.sh &&
 source common-provision.sh
 
 
