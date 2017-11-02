@@ -45,7 +45,7 @@ sudo /tmp/env/bin/pip wheel --wheel-dir=%{buildroot}/var/wheels/%{name} --find-l
 %post
 
 pip install --use-wheel --no-index --find-links=/var/wheels/%{name} virtualenv && \
-if [ ! -d "/opt/amqpinflux/env" ]; then virtualenv /opt/amqpinflux/env; fi && \
+if [ ! -d "/opt/amqpinflux/env" ]; then virtualenv --no-download /opt/amqpinflux/env; fi && \
 /opt/amqpinflux/env/bin/pip install --upgrade --force-reinstall --use-wheel --no-index --find-links=/var/wheels/%{name} cloudify-amqp-influxdb --pre
 
 
