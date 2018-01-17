@@ -1,0 +1,61 @@
+version: 2
+
+jobs:
+
+  test:
+    machine: true
+
+    environment:
+      INFLUXDB_VERSION: 0.8.8
+
+    steps:
+      - run: pip install --user tox
+      - checkout
+      - run: >
+          if [ -n "$CI_PULL_REQUEST" ]; then
+            PR_ID=${CI_PULL_REQUEST##*/}
+            git fetch origin +refs/pull/$PR_ID/merge:
+            git checkout -qf FETCH_HEAD
+          fi
+
+      - run: sudo apt-get update
+      - run: sudo apt-get install rabbitmq-server
+      - run: sudo ./install_influxdb.sh "$INFLUXDB_VERSION"
+      - run: python -m tox -e docs
+      - run: python -m tox -e flake8
+      - run: python -m tox -e py27 INFLUXDB_VERSION=$INFLUXDB_VERSION
+
+
+  build-rpm:
+    machine:
+      enabled: true
+
+    steps:
+      - checkout
+      - run: pip install requests
+      - run: git clone --depth 1 https://github.com/cloudify-cosmo/cloudify-manager.git ~/cloudify-manager
+      - run: |
+          cd ~/cloudify-manager
+          git fetch --depth 1 origin "${CIRCLE_BRANCH}" && git checkout "${CIRCLE_BRANCH}" || echo no matching branch found, using master
+      - run: |
+          builder="docker run --cap-add SYS_ADMIN --security-opt apparmor:unconfined \
+            --mount type=bind,source=$(pwd),target=/source \
+            --mount type=bind,source=${HOME}/cloudify-manager,target=/builder \
+            cloudify3/mock-builder:0.1 \
+            python /builder/packaging/build_rpm.py"
+          $builder /source/packaging/cloudify-amqp-influxdb.spec
+      - run: mkdir result
+      - run: mv ~/cloudify-manager/packaging/*.rpm result
+
+      - store_artifacts:
+          path: result
+          destination: result
+
+
+workflows:
+  version: 2
+
+  build_and_test:
+    jobs:
+      - test
+      - build-rpm
