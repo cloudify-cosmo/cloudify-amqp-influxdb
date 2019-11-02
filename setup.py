@@ -30,6 +30,6 @@ setup(
     },
     install_requires=[
         'pika==0.9.14',
-        'requests==2.7.0'
+        'requests==2.20.0'
     ],
 )
